@@ -1,9 +1,4 @@
-#include <Arduino.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <lvgl.h>
-#include "PCA9557.h"
-#include "gfx_conf.h"
+#include "common.h"
 
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t disp_draw_buf1[screenWidth * screenHeight / 10];
@@ -26,7 +21,7 @@ void styleinit_button(lv_style_t &style_button, lv_style_t &style_button_pressed
 void objcreate_button(
   lv_style_t &style_button,
   lv_style_t &style_button_pressed,
-  lv_obj_t button,
+  lv_obj_t *button,
   lv_coord_t x,
   lv_coord_t y,
   lv_coord_t w,
@@ -81,17 +76,71 @@ void setup() {
   styleinit_button(style_button, style_button_pressed);
 
   /* Creating objects */
+  //Buttons for changing settings
   lv_obj_t * btn_speed = lv_btn_create(screen);
-  lv_obj_set_align(btn_speed, LV_ALIGN_CENTER);
-  lv_obj_set_y(btn_speed, 0);
-  lv_obj_set_size(btn_speed, 80, 40);
-  lv_obj_add_style(btn_speed, &style_button, 0);
-  lv_obj_add_style(btn_speed, &style_button_pressed, LV_STATE_PRESSED);
+  objcreate_button(style_button, style_button_pressed, btn_speed, PAD30, -(PAD30+BTN_H)/2 - PAD40, BTN_W, BTN_H);
+
+  lv_obj_t * btn_dwell = lv_btn_create(screen);
+  objcreate_button(style_button, style_button_pressed, btn_dwell, PAD30, (PAD30+BTN_H)/2 - PAD40, BTN_W, BTN_H);
+
+  lv_obj_t * btn_angle = lv_btn_create(screen);
+  objcreate_button(style_button, style_button_pressed, btn_angle, PAD30, (3*(PAD30+BTN_H))/2 - PAD40, BTN_W, BTN_H);
+
+  lv_obj_t * btn_count = lv_btn_create(screen);
+  objcreate_button(style_button, style_button_pressed, btn_count, PAD30, (5*(PAD30+BTN_H))/2 - PAD40, BTN_W, BTN_H);
+
+  //Title
+  lv_obj_t *txt_title = lv_obj_create(screen);
+  lv_obj_set_size(txt_title, screenWidth - 2*(PAD30), TITLE_H);
+  lv_obj_set_align(txt_title, LV_ALIGN_TOP_MID);
+  lv_obj_set_y(txt_title, PAD20);
+
+  //Count
+  lv_obj_t *txt_count = lv_obj_create(screen);
+  lv_obj_set_size(txt_count, (2*(screenWidth - 2*(PAD30)))/3, TITLE_H);
+  lv_obj_set_align(txt_count, LV_ALIGN_RIGHT_MID);
+  lv_obj_set_x(txt_count, -PAD30);
+  lv_obj_set_y(txt_count, -(PAD30+BTN_H)/2 - PAD40);
+
+  //Horizontal line
+  static lv_point_t line_points[] = {{screenWidth/3,screenHeight/2}, {screenWidth-PAD30, screenHeight/2}}; //Adjust y (eventually)
+  
+  static lv_style_t style_line;
+  lv_style_init(&style_line);
+  lv_style_set_line_width(&style_line, 8);
+  lv_style_set_line_color(&style_line, lv_palette_main(LV_PALETTE_BLUE));
+  lv_style_set_line_rounded(&style_line, true);
+
+  lv_obj_t *h_line = lv_line_create(screen);
+  lv_line_set_points(h_line, line_points, 2);
+  lv_obj_add_style(h_line, &style_line, 0);
 
   /* Drawing objects */
   lv_obj_t *lbl_speed = lv_label_create(btn_speed);
   lv_obj_set_align(lbl_speed, LV_ALIGN_CENTER);
-  lv_label_set_text(lbl_speed, "Button");
+  lv_label_set_text(lbl_speed, "Speed");
+
+  lv_obj_t *lbl_dwell = lv_label_create(btn_dwell);
+  lv_obj_set_align(lbl_dwell, LV_ALIGN_CENTER);
+  lv_label_set_text(lbl_dwell, "Dwell");
+
+  lv_obj_t *lbl_angle = lv_label_create(btn_angle);
+  lv_obj_set_align(lbl_angle, LV_ALIGN_CENTER);
+  lv_label_set_text(lbl_angle, "Angle");
+
+  lv_obj_t *lbl_count = lv_label_create(btn_count);
+  lv_obj_set_align(lbl_count, LV_ALIGN_CENTER);
+  lv_label_set_text(lbl_count, "Count");
+
+  lv_obj_t *lbl_title = lv_label_create(txt_title);
+  lv_obj_set_align(lbl_title, LV_ALIGN_CENTER);
+  lv_obj_set_style_text_font(lbl_title, &lv_font_montserrat_28_compressed, LV_PART_MAIN);
+  lv_label_set_text(lbl_title, "Cycle Tester - Rotational Motion");
+
+  lv_obj_t *lbl_txt_count = lv_label_create(txt_count);
+  lv_obj_set_align(lbl_txt_count, LV_ALIGN_CENTER);
+  lv_obj_set_style_text_font(lbl_txt_count, &lv_font_montserrat_40, 0);
+  lv_label_set_text(lbl_txt_count, "Count = 123456");
 
   Serial.println("Setup done");
 }
@@ -178,6 +227,7 @@ void styleinit_button(lv_style_t &style_button, lv_style_t &style_button_pressed
   lv_style_set_border_opa(&style_button, (255*20/100));
   lv_style_set_border_width(&style_button, 2);
   lv_style_set_text_color(&style_button, lv_color_hex(0x000000));
+  lv_style_set_text_font(&style_button, &lv_font_montserrat_24);
 
   lv_style_init(&style_button_pressed);
   lv_style_set_bg_color(&style_button_pressed, lv_color_hex(0xbdbdbd));
@@ -185,6 +235,12 @@ void styleinit_button(lv_style_t &style_button, lv_style_t &style_button_pressed
 }
 
 void objcreate_button(lv_style_t &style_button, lv_style_t &style_button_pressed,
-  lv_obj_t button, lv_coord_t x, lv_coord_t y, lv_coord_t w, lv_coord_t h) {
-
+  lv_obj_t *button, lv_coord_t x, lv_coord_t y, lv_coord_t w, lv_coord_t h)
+{
+  lv_obj_set_align(button, LV_ALIGN_LEFT_MID);
+  lv_obj_set_x(button, x);
+  lv_obj_set_y(button, y);
+  lv_obj_set_size(button, w, h);
+  lv_obj_add_style(button, &style_button, 0);
+  lv_obj_add_style(button, &style_button_pressed, LV_STATE_PRESSED);
 }
