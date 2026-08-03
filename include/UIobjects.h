@@ -21,5 +21,6 @@ lv_obj_t *flexbox (
 ); 
 
 static void btn_event_cb(lv_event_t * e);
+lv_obj_t *create_panel(lv_obj_t *button, lv_obj_t* parent);
 lv_obj_t *make_slider(lv_obj_t *button, lv_obj_t *container);
 lv_obj_t *create_title(lv_obj_t *parent, const char *text);

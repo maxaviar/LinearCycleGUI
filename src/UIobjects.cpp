@@ -33,18 +33,31 @@ static void btn_event_cb(lv_event_t* e) {
   }
 }
 
+lv_obj_t *create_panel(lv_obj_t *button, lv_obj_t* parent) {
+  lv_obj_t *slider_panel = lv_obj_create(parent);
+
+  lv_obj_add_flag(slider_panel, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_add_event_cb(button, btn_event_cb, LV_EVENT_CLICKED, slider_panel);
+
+  lv_obj_set_size(slider_panel, lv_pct(30), lv_pct(20));
+  lv_obj_set_style_bg_color(slider_panel, lv_color_white(), LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(slider_panel, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_set_style_border_width(slider_panel, 2, LV_PART_MAIN);
+  lv_obj_set_style_border_color(slider_panel, lv_palette_main(LV_PALETTE_GREY), LV_PART_MAIN);
+  lv_obj_set_style_radius(slider_panel, 10, LV_PART_MAIN);
+  lv_obj_align_to(slider_panel, button, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+
+  return slider_panel;
+}
+
 lv_obj_t *make_slider(lv_obj_t *button, lv_obj_t *container) {
   lv_obj_t *slider = lv_slider_create(container);
 
   lv_obj_add_flag(slider, LV_OBJ_FLAG_HIDDEN);  
   lv_obj_add_event_cb(button, btn_event_cb, LV_EVENT_CLICKED, slider);
 
-  lv_obj_set_width(slider, lv_pct(25));
-  lv_obj_align_to(slider, button, LV_ALIGN_RIGHT_MID, lv_pct(40), 0);
+  lv_obj_set_width(slider, lv_pct(90));
 
-  /* Hide initially */
-  lv_obj_add_flag(slider, LV_OBJ_FLAG_HIDDEN);
-  
   return slider;
 }
 
