@@ -5,7 +5,7 @@
 
 void setup() {
   Serial.begin(115200);
-  
+
   //GPIO init
   #if defined (CrowPanel_50) || defined (CrowPanel_70)
   pinMode(38, OUTPUT);
@@ -44,6 +44,11 @@ void setup() {
   tft.fillScreen(TFT_BLACK);
   lv_obj_t *screen = lv_scr_act();
 
+  /* Creating flexboxes */
+  lv_obj_t *settings = flexbox(screen, LV_ALIGN_LEFT_MID, LV_FLEX_FLOW_COLUMN, 25, 80, 5, 0);
+  lv_obj_t *progress = flexbox(screen, LV_ALIGN_TOP_RIGHT, LV_FLEX_FLOW_ROW_WRAP, 60, 35, -5, 10);
+  lv_obj_t *startstop = flexbox(screen, LV_ALIGN_BOTTOM_RIGHT, LV_FLEX_FLOW_ROW, 60, 25, -5, -10);
+
   /* Creating styles */
   static lv_style_t style_norm_btn;
   static lv_style_t style_norm_btn_p;
@@ -62,55 +67,27 @@ void setup() {
   styleinit_button(style_rst_btn, style_rst_btn_p, RESET_BUTTON);
 
   /* Creating objects */
-  //Buttons for changing settings
-  lv_obj_t * btn_speed = lv_btn_create(screen);
-  objcreate_button(style_norm_btn, style_norm_btn_p, btn_speed, PAD30, -(PAD30+BTN_H)/2 - PAD40, BTN_W, BTN_H);
-
-  lv_obj_t * btn_dwell = lv_btn_create(screen);
-  objcreate_button(style_norm_btn, style_norm_btn_p, btn_dwell, PAD30, (PAD30+BTN_H)/2 - PAD40, BTN_W, BTN_H);
-
-  lv_obj_t * btn_angle = lv_btn_create(screen);
-  objcreate_button(style_norm_btn, style_norm_btn_p, btn_angle, PAD30, (3*(PAD30+BTN_H))/2 - PAD40, BTN_W, BTN_H);
-
-  lv_obj_t * btn_count = lv_btn_create(screen);
-  objcreate_button(style_norm_btn, style_norm_btn_p, btn_count, PAD30, (5*(PAD30+BTN_H))/2 - PAD40, BTN_W, BTN_H);
-
-  //Title
-  lv_obj_t *txt_title = lv_obj_create(screen);
-  lv_obj_set_size(txt_title, screenWidth - 2*(PAD30), TITLE_H);
-  lv_obj_set_align(txt_title, LV_ALIGN_TOP_MID);
-  lv_obj_set_y(txt_title, PAD20);
-
-  //Count
-  lv_obj_t *txt_count = lv_obj_create(screen);
-  lv_obj_set_size(txt_count, (2*(screenWidth - 2*(PAD30)))/3, TITLE_H);
-  lv_obj_set_align(txt_count, LV_ALIGN_RIGHT_MID);
-  lv_obj_set_x(txt_count, -PAD30);
-  lv_obj_set_y(txt_count, -(PAD30+BTN_H)/2 - PAD40);
-
-  //Horizontal line
-  static lv_point_t line_points[] = {{screenWidth/3,screenHeight/2}, {screenWidth-PAD30, screenHeight/2}}; //Adjust y (eventually)
+  //Settings menu
+  lv_obj_t *btn_speed = objcreate_button(settings, style_norm_btn, style_norm_btn_p, BTN_W, BTN_H);
+  lv_obj_t *btn_dwell = objcreate_button(settings, style_norm_btn, style_norm_btn_p, BTN_W, BTN_H);
+  lv_obj_t *btn_angle = objcreate_button(settings, style_norm_btn, style_norm_btn_p, BTN_W, BTN_H);
+  lv_obj_t *btn_count = objcreate_button(settings, style_norm_btn, style_norm_btn_p, BTN_W, BTN_H);
   
-  static lv_style_t style_line;
-  lv_style_init(&style_line);
-  lv_style_set_line_width(&style_line, 8);
-  lv_style_set_line_color(&style_line, lv_palette_main(LV_PALETTE_BLUE));
-  lv_style_set_line_rounded(&style_line, true);
+  //Progress menu
+  lv_obj_t *slider = make_slider(btn_speed, screen);
 
-  lv_obj_t *h_line = lv_line_create(screen);
-  lv_line_set_points(h_line, line_points, 2);
-  lv_obj_add_style(h_line, &style_line, 0);
+  //Start/Stop menu
+  lv_obj_t *btn_strt = objcreate_button(startstop, style_strt_btn, style_strt_btn_p, 40, 90);
+  lv_obj_t *btn_stop = objcreate_button(startstop, style_stop_btn, style_stop_btn_p, 40, 90);
 
   /* Drawing objects */
   lv_obj_t *lbl_speed = create_title(btn_speed, "Speed");
   lv_obj_t *lbl_dwell = create_title(btn_dwell, "Dwell");
   lv_obj_t *lbl_angle = create_title(btn_angle, "Angle");
   lv_obj_t *lbl_count = create_title(btn_count, "Count");
+  lv_obj_t *lbl_strt = create_title(btn_strt, "Start");
+  lv_obj_t *lbl_stop = create_title(btn_stop, "Stop");
 
-  lv_obj_t *lbl_title = create_title(txt_title, "Cycle Tester - Rotational Motion");
-  lv_obj_set_style_text_font(lbl_title, &lv_font_montserrat_28_compressed, LV_PART_MAIN); //find out why this isn't bold
-  lv_obj_t *lbl_txt_count = create_title(txt_count, "Count = 123456");
-  lv_obj_set_style_text_font(lbl_txt_count, &lv_font_montserrat_40, 0);
 
   Serial.println("Setup done");
 }
