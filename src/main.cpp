@@ -1,37 +1,11 @@
 #include "common.h"
-
-static lv_disp_draw_buf_t draw_buf;
-static lv_color_t disp_draw_buf1[screenWidth * screenHeight / 10];
-static lv_color_t disp_draw_buf2[screenWidth * screenHeight / 10];
-static lv_disp_drv_t disp_drv;
-
-PCA9557 Out;    //for touch timing init
-
-/* Initializing display */
-void display_init();
-
-/* Display flushing */
-void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p);
-void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data);
-
-/* Setting styles */
-void styleinit_button(lv_style_t &style_button, lv_style_t &style_button_pressed);
-
-/* Creating objects */
-void objcreate_button(
-  lv_style_t &style_button,
-  lv_style_t &style_button_pressed,
-  lv_obj_t *button,
-  lv_coord_t x,
-  lv_coord_t y,
-  lv_coord_t w,
-  lv_coord_t h
-);
+#include "firmware.h"
+#include "UIstyles.h"
+#include "UIobjects.h"
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("LVGL Widgets Demo");
-
+  
   //GPIO init
   #if defined (CrowPanel_50) || defined (CrowPanel_70)
   pinMode(38, OUTPUT);
@@ -71,23 +45,35 @@ void setup() {
   lv_obj_t *screen = lv_scr_act();
 
   /* Creating styles */
-  static lv_style_t style_button;
-  static lv_style_t style_button_pressed;
-  styleinit_button(style_button, style_button_pressed);
+  static lv_style_t style_norm_btn;
+  static lv_style_t style_norm_btn_p;
+  styleinit_button(style_norm_btn, style_norm_btn_p, NORMAL_BUTTON);
+
+  static lv_style_t style_strt_btn;
+  static lv_style_t style_strt_btn_p;
+  styleinit_button(style_strt_btn, style_strt_btn_p, START_BUTTON);
+
+  static lv_style_t style_stop_btn;
+  static lv_style_t style_stop_btn_p;
+  styleinit_button(style_stop_btn, style_stop_btn_p, STOP_BUTTON);
+
+  static lv_style_t style_rst_btn;
+  static lv_style_t style_rst_btn_p;
+  styleinit_button(style_rst_btn, style_rst_btn_p, RESET_BUTTON);
 
   /* Creating objects */
   //Buttons for changing settings
   lv_obj_t * btn_speed = lv_btn_create(screen);
-  objcreate_button(style_button, style_button_pressed, btn_speed, PAD30, -(PAD30+BTN_H)/2 - PAD40, BTN_W, BTN_H);
+  objcreate_button(style_norm_btn, style_norm_btn_p, btn_speed, PAD30, -(PAD30+BTN_H)/2 - PAD40, BTN_W, BTN_H);
 
   lv_obj_t * btn_dwell = lv_btn_create(screen);
-  objcreate_button(style_button, style_button_pressed, btn_dwell, PAD30, (PAD30+BTN_H)/2 - PAD40, BTN_W, BTN_H);
+  objcreate_button(style_norm_btn, style_norm_btn_p, btn_dwell, PAD30, (PAD30+BTN_H)/2 - PAD40, BTN_W, BTN_H);
 
   lv_obj_t * btn_angle = lv_btn_create(screen);
-  objcreate_button(style_button, style_button_pressed, btn_angle, PAD30, (3*(PAD30+BTN_H))/2 - PAD40, BTN_W, BTN_H);
+  objcreate_button(style_norm_btn, style_norm_btn_p, btn_angle, PAD30, (3*(PAD30+BTN_H))/2 - PAD40, BTN_W, BTN_H);
 
   lv_obj_t * btn_count = lv_btn_create(screen);
-  objcreate_button(style_button, style_button_pressed, btn_count, PAD30, (5*(PAD30+BTN_H))/2 - PAD40, BTN_W, BTN_H);
+  objcreate_button(style_norm_btn, style_norm_btn_p, btn_count, PAD30, (5*(PAD30+BTN_H))/2 - PAD40, BTN_W, BTN_H);
 
   //Title
   lv_obj_t *txt_title = lv_obj_create(screen);
@@ -116,31 +102,15 @@ void setup() {
   lv_obj_add_style(h_line, &style_line, 0);
 
   /* Drawing objects */
-  lv_obj_t *lbl_speed = lv_label_create(btn_speed);
-  lv_obj_set_align(lbl_speed, LV_ALIGN_CENTER);
-  lv_label_set_text(lbl_speed, "Speed");
+  lv_obj_t *lbl_speed = create_title(btn_speed, "Speed");
+  lv_obj_t *lbl_dwell = create_title(btn_dwell, "Dwell");
+  lv_obj_t *lbl_angle = create_title(btn_angle, "Angle");
+  lv_obj_t *lbl_count = create_title(btn_count, "Count");
 
-  lv_obj_t *lbl_dwell = lv_label_create(btn_dwell);
-  lv_obj_set_align(lbl_dwell, LV_ALIGN_CENTER);
-  lv_label_set_text(lbl_dwell, "Dwell");
-
-  lv_obj_t *lbl_angle = lv_label_create(btn_angle);
-  lv_obj_set_align(lbl_angle, LV_ALIGN_CENTER);
-  lv_label_set_text(lbl_angle, "Angle");
-
-  lv_obj_t *lbl_count = lv_label_create(btn_count);
-  lv_obj_set_align(lbl_count, LV_ALIGN_CENTER);
-  lv_label_set_text(lbl_count, "Count");
-
-  lv_obj_t *lbl_title = lv_label_create(txt_title);
-  lv_obj_set_align(lbl_title, LV_ALIGN_CENTER);
-  lv_obj_set_style_text_font(lbl_title, &lv_font_montserrat_28_compressed, LV_PART_MAIN);
-  lv_label_set_text(lbl_title, "Cycle Tester - Rotational Motion");
-
-  lv_obj_t *lbl_txt_count = lv_label_create(txt_count);
-  lv_obj_set_align(lbl_txt_count, LV_ALIGN_CENTER);
+  lv_obj_t *lbl_title = create_title(txt_title, "Cycle Tester - Rotational Motion");
+  lv_obj_set_style_text_font(lbl_title, &lv_font_montserrat_28_compressed, LV_PART_MAIN); //find out why this isn't bold
+  lv_obj_t *lbl_txt_count = create_title(txt_count, "Count = 123456");
   lv_obj_set_style_text_font(lbl_txt_count, &lv_font_montserrat_40, 0);
-  lv_label_set_text(lbl_txt_count, "Count = 123456");
 
   Serial.println("Setup done");
 }
@@ -148,99 +118,4 @@ void setup() {
 void loop() {
     lv_timer_handler();
     delay(5);
-}
-
-void display_init() {
-  //Display Prepare
-  tft.begin();
-  tft.fillScreen(TFT_BLACK);
-  tft.setTextSize(2);
-  delay(200);
-
-  lv_init();
-
-  delay(100);
-
-  lv_disp_draw_buf_init(&draw_buf, disp_draw_buf1, disp_draw_buf2, screenWidth * screenHeight/10);
-  /* Initialize the display */
-  lv_disp_drv_init(&disp_drv);
-  /* Change the following line to your display resolution */
-  disp_drv.hor_res = screenWidth;
-  disp_drv.ver_res = screenHeight;
-  disp_drv.flush_cb = my_disp_flush;
-  disp_drv.full_refresh = 1;
-  disp_drv.draw_buf = &draw_buf;
-  lv_disp_drv_register(&disp_drv);
-
-  /* Initialize the (dummy) input device driver */
-  static lv_indev_drv_t indev_drv;
-  lv_indev_drv_init(&indev_drv);
-  indev_drv.type = LV_INDEV_TYPE_POINTER;
-  indev_drv.read_cb = my_touchpad_read;
-  lv_indev_drv_register(&indev_drv);
-}
-
-void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
-{
-   uint32_t w = ( area->x2 - area->x1 + 1 );
-   uint32_t h = ( area->y2 - area->y1 + 1 );
-
-   tft.pushImageDMA(area->x1, area->y1, w, h,(lgfx::rgb565_t*)&color_p->full);
-
-   lv_disp_flush_ready( disp );
-
-}
-
-void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
-{
-   uint16_t touchX, touchY;
-   bool touched = tft.getTouch( &touchX, &touchY);
-   if( !touched )
-   {
-      data->state = LV_INDEV_STATE_REL;
-   }
-   else
-   {
-      data->state = LV_INDEV_STATE_PR;
-
-      /*Set the coordinates*/
-      data->point.x = touchX;
-      data->point.y = touchY;
-
-      Serial.print( "Data x " );
-      Serial.println( touchX );
-
-      Serial.print( "Data y " );
-      Serial.println( touchY );
-   }
-}
-
-void styleinit_button(lv_style_t &style_button, lv_style_t &style_button_pressed) {
-  //After verifying this works, change the colors off of hex
-  lv_style_init(&style_button);
-  lv_style_set_radius(&style_button, 10);
-  lv_style_set_bg_opa(&style_button, (255*100/100));
-  lv_style_set_bg_color(&style_button, lv_color_hex(0xeeeeee));
-  lv_style_set_bg_grad_color(&style_button, lv_color_hex(0x9e9e9e));
-  lv_style_set_bg_grad_dir(&style_button, LV_GRAD_DIR_VER);
-  lv_style_set_border_color(&style_button, lv_color_hex(0x000000));
-  lv_style_set_border_opa(&style_button, (255*20/100));
-  lv_style_set_border_width(&style_button, 2);
-  lv_style_set_text_color(&style_button, lv_color_hex(0x000000));
-  lv_style_set_text_font(&style_button, &lv_font_montserrat_24);
-
-  lv_style_init(&style_button_pressed);
-  lv_style_set_bg_color(&style_button_pressed, lv_color_hex(0xbdbdbd));
-  lv_style_set_bg_grad_color(&style_button_pressed, lv_color_hex(0x757575));
-}
-
-void objcreate_button(lv_style_t &style_button, lv_style_t &style_button_pressed,
-  lv_obj_t *button, lv_coord_t x, lv_coord_t y, lv_coord_t w, lv_coord_t h)
-{
-  lv_obj_set_align(button, LV_ALIGN_LEFT_MID);
-  lv_obj_set_x(button, x);
-  lv_obj_set_y(button, y);
-  lv_obj_set_size(button, w, h);
-  lv_obj_add_style(button, &style_button, 0);
-  lv_obj_add_style(button, &style_button_pressed, LV_STATE_PRESSED);
 }

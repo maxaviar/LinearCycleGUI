@@ -319,4 +319,4 @@ public:
 };
 #endif
 
-LGFX tft;
+extern LGFX tft;

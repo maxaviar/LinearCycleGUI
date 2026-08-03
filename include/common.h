@@ -17,4 +17,9 @@ All macros used for sizing and positioning of objects
 #define BTN_W 180
 #define BTN_H 60
 
+#define NORMAL_BUTTON   0
+#define START_BUTTON    1
+#define STOP_BUTTON     2
+#define RESET_BUTTON    3
+
 #define TITLE_H 80
