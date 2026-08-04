@@ -22,6 +22,8 @@ lv_obj_t *flexbox (lv_obj_t* parent, lv_align_t alignment, lv_flex_flow_t flow, 
   lv_obj_t *box = lv_obj_create(parent);
 
   // Size and align the container
+  lv_obj_set_style_bg_color(box, lv_color_hex(0x333333), 0);
+  lv_obj_set_style_bg_opa(box, LV_OPA_COVER, 0);
   lv_obj_set_size(box, LV_PCT(w), LV_PCT(h));
   lv_obj_align(box, alignment, lv_pct(x_align), lv_pct(y_align));
   lv_obj_set_flex_flow(box, flow);
@@ -56,7 +58,8 @@ static void dwell_event_cb(lv_event_t *e) {
   if (lv_event_get_user_data(e) != NULL) { //shouldn't ever be null, but dereferencing a null pointer is never fun so #justincase
     int32_t *var = (int32_t*)lv_event_get_user_data(e);
     lv_obj_t *slider = lv_event_get_target(e);
-    *var = lv_slider_get_value(slider);
+    int32_t slide_val = lv_slider_get_value(slider);
+    *var = slide_val*500;
 
     lv_label_set_text_fmt(dwell_label, "%d ms", *var);
   }
@@ -66,7 +69,8 @@ static void angle_event_cb(lv_event_t *e) {
   if (lv_event_get_user_data(e) != NULL) { //shouldn't ever be null, but dereferencing a null pointer is never fun so #justincase
     int32_t *var = (int32_t*)lv_event_get_user_data(e);
     lv_obj_t *slider = lv_event_get_target(e);
-    *var = lv_slider_get_value(slider);
+    int32_t slide_val = lv_slider_get_value(slider);
+    *var = slide_val*10;
 
     lv_label_set_text_fmt(angle_label, "%d degrees", *var);
   }
@@ -112,6 +116,7 @@ lv_obj_t *make_slider(lv_obj_t *button, lv_obj_t *container, int32_t min, int32_
       break;
 
     case DWELL:
+      max = max/500;
       lv_slider_set_range(slider, min, max);
       dwell_label = lv_label_create(container);
       lv_label_set_text_fmt(dwell_label, "%d ms", settings.dwell);
@@ -120,6 +125,8 @@ lv_obj_t *make_slider(lv_obj_t *button, lv_obj_t *container, int32_t min, int32_
       break;
 
     case ANGLE:
+      min = min/10;
+      max = max/10;
       lv_slider_set_range(slider, min, max);
       angle_label = lv_label_create(container);
       lv_label_set_text_fmt(angle_label, "%d degrees", settings.angle);
@@ -137,10 +144,21 @@ lv_obj_t *make_slider(lv_obj_t *button, lv_obj_t *container, int32_t min, int32_
   return slider;
 }
 
-lv_obj_t* create_title(lv_obj_t* parent, const char* text) {
+lv_obj_t *create_title(lv_obj_t *parent, const char *text) {
   lv_obj_t* label = lv_label_create(parent);
   lv_obj_set_align(label, LV_ALIGN_CENTER);
   lv_label_set_text(label, text);
+
+  return label;
+}
+
+lv_obj_t *create_title_special(lv_obj_t *parent, const char *text, const lv_font_t *font, lv_color_t color) {
+  lv_obj_t* label = lv_label_create(parent);
+  lv_obj_set_align(label, LV_ALIGN_CENTER);
+  lv_label_set_text(label, text);
+  
+  lv_obj_set_style_text_font(label, font, 0);
+  lv_obj_set_style_text_color(label, color, 0);
 
   return label;
 }

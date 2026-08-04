@@ -32,3 +32,4 @@ static void angle_event_cb(lv_event_t * e);
 lv_obj_t *create_panel(lv_obj_t *button, lv_obj_t* parent);
 lv_obj_t *make_slider(lv_obj_t *button, lv_obj_t *container, int32_t min, int32_t max, int val);
 lv_obj_t *create_title(lv_obj_t *parent, const char *text);
+lv_obj_t *create_title_special(lv_obj_t *parent, const char *text, const lv_font_t *font, lv_color_t color);

@@ -42,8 +42,12 @@ void setup() {
 
   display_init();
   tft.fillScreen(TFT_BLACK);
+
   lv_obj_t *screen = lv_scr_act();
 
+  lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x000000), 0); //grey background
+  lv_obj_set_style_bg_opa(lv_scr_act(), LV_OPA_COVER, 0);
+  
   /* Creating flexboxes */
   lv_obj_t *settings = flexbox(screen, LV_ALIGN_LEFT_MID, LV_FLEX_FLOW_COLUMN, 25, 80, 5, 0);
   lv_obj_t *progress = flexbox(screen, LV_ALIGN_TOP_RIGHT, LV_FLEX_FLOW_ROW_WRAP, 60, 35, -5, 10);
@@ -92,7 +96,8 @@ void setup() {
   lv_obj_t *lbl_count = create_title(btn_count, "Count");
   lv_obj_t *lbl_strt = create_title(btn_strt, "Start");
   lv_obj_t *lbl_stop = create_title(btn_stop, "Stop");
-
+  lv_obj_t *lbl_progress = create_title_special(progress, "Count: 123456", &lv_font_montserrat_48, lv_color_white());
+  lv_obj_t *lbl_target = create_title_special(progress, "Target: abcdef", &lv_font_montserrat_36, lv_color_white());
 
   Serial.println("Setup done");
 }
