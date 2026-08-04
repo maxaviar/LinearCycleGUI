@@ -50,7 +50,7 @@ void setup() {
   
   /* Creating flexboxes */
   lv_obj_t *settings = flexbox(screen, LV_ALIGN_LEFT_MID, LV_FLEX_FLOW_COLUMN, 25, 80, 5, 0);
-  lv_obj_t *progress = flexbox(screen, LV_ALIGN_TOP_RIGHT, LV_FLEX_FLOW_ROW_WRAP, 60, 35, -5, 10);
+  lv_obj_t *progress = flexbox(screen, LV_ALIGN_TOP_RIGHT, LV_FLEX_FLOW_COLUMN, 60, 45, -5, 10);
   lv_obj_t *startstop = flexbox(screen, LV_ALIGN_BOTTOM_RIGHT, LV_FLEX_FLOW_ROW, 60, 25, -5, -10);
 
   /* Creating styles */
@@ -75,7 +75,6 @@ void setup() {
   lv_obj_t *btn_speed = objcreate_button(settings, style_norm_btn, style_norm_btn_p, BTN_W, BTN_H);
   lv_obj_t *btn_dwell = objcreate_button(settings, style_norm_btn, style_norm_btn_p, BTN_W, BTN_H);
   lv_obj_t *btn_angle = objcreate_button(settings, style_norm_btn, style_norm_btn_p, BTN_W, BTN_H);
-  lv_obj_t *btn_count = objcreate_button(settings, style_norm_btn, style_norm_btn_p, BTN_W, BTN_H);
   
   //Progress menu
   lv_obj_t *speed_slider_panel = create_panel(btn_speed, screen);
@@ -88,16 +87,18 @@ void setup() {
   //Start/Stop menu
   lv_obj_t *btn_strt = objcreate_button(startstop, style_strt_btn, style_strt_btn_p, 40, 90);
   lv_obj_t *btn_stop = objcreate_button(startstop, style_stop_btn, style_stop_btn_p, 40, 90);
+  startstopswitch(btn_strt, btn_stop);
+
+  lv_obj_t *btn_limit = objcreate_button(startstop, style_norm_btn, style_norm_btn_p, 40, 90);
 
   /* Drawing objects */
   lv_obj_t *lbl_speed = create_title(btn_speed, "Speed");
   lv_obj_t *lbl_dwell = create_title(btn_dwell, "Dwell");
   lv_obj_t *lbl_angle = create_title(btn_angle, "Angle");
-  lv_obj_t *lbl_count = create_title(btn_count, "Count");
   lv_obj_t *lbl_strt = create_title(btn_strt, "Start");
-  lv_obj_t *lbl_stop = create_title(btn_stop, "Stop");
   lv_obj_t *lbl_progress = create_title_special(progress, "Count: 123456", &lv_font_montserrat_48, lv_color_white());
   lv_obj_t *lbl_target = create_title_special(progress, "Target: abcdef", &lv_font_montserrat_36, lv_color_white());
+  lv_obj_t *lbl_limit = create_limit(btn_limit);
 
   Serial.println("Setup done");
 }

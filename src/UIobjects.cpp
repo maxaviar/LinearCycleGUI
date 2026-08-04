@@ -1,6 +1,7 @@
 #include "UIobjects.h"
 
 Settings settings;
+bool limit_en;
 
 lv_obj_t *speed_label;
 lv_obj_t *dwell_label;
@@ -32,7 +33,16 @@ lv_obj_t *flexbox (lv_obj_t* parent, lv_align_t alignment, lv_flex_flow_t flow, 
   return box;
 } 
 
-static void btn_event_cb(lv_event_t* e) {
+static void limit_event_cb(lv_event_t *e) {
+  lv_obj_t *label = (lv_obj_t *) lv_event_get_user_data(e);
+
+  if (!limit_en) lv_label_set_text(label, "Limit: ON");
+  else lv_label_set_text(label, "Limit: OFF");
+  
+  limit_en = !limit_en;
+}
+
+static void btn_event_cb(lv_event_t *e) {
   lv_event_code_t code = lv_event_get_code(e);
   lv_obj_t *slider = (lv_obj_t *)lv_event_get_user_data(e);
   bool hidden = lv_obj_has_flag(slider, LV_OBJ_FLAG_HIDDEN);
@@ -74,6 +84,32 @@ static void angle_event_cb(lv_event_t *e) {
 
     lv_label_set_text_fmt(angle_label, "%d degrees", *var);
   }
+}
+
+static void startstop_event_cb(lv_event_t *e) {
+  lv_event_code_t code = lv_event_get_code(e);
+  lv_obj_t *button = (lv_obj_t *)lv_event_get_user_data(e);
+  bool hidden = lv_obj_has_flag(button, LV_OBJ_FLAG_HIDDEN);
+
+  if (hidden) lv_obj_clear_flag(button, LV_OBJ_FLAG_HIDDEN); // Show button
+  else lv_obj_add_flag(button, LV_OBJ_FLAG_HIDDEN); // Hide button
+}
+
+void startstopswitch (lv_obj_t *start, lv_obj_t *stop) {
+  lv_obj_add_flag(stop, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_add_event_cb(start, btn_event_cb, LV_EVENT_CLICKED, stop); //these events need to separated into two separate ones
+  lv_obj_add_event_cb(stop, btn_event_cb, LV_EVENT_CLICKED, start);
+}
+
+lv_obj_t *create_limit(lv_obj_t *button) {
+  lv_obj_t *label = lv_label_create(button);
+  lv_obj_set_align(label, LV_ALIGN_CENTER);
+  lv_label_set_text(label, "Limit: OFF");
+  limit_en = false;
+
+  lv_obj_add_event_cb(button, limit_event_cb, LV_EVENT_CLICKED, label);
+
+  return label;
 }
 
 lv_obj_t *create_panel(lv_obj_t *button, lv_obj_t* parent) {

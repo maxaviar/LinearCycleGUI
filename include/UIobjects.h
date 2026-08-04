@@ -24,11 +24,15 @@ lv_obj_t *flexbox (
   lv_coord_t y_align
 ); 
 
+static void limit_event_cb(lv_event_t * e);
 static void btn_event_cb(lv_event_t * e);
 static void speed_event_cb(lv_event_t * e);
 static void dwell_event_cb(lv_event_t * e);
 static void angle_event_cb(lv_event_t * e);
+static void startstop_event_cb(lv_event_t * e);
 
+void startstopswitch (lv_obj_t *start, lv_obj_t *stop);
+lv_obj_t *create_limit(lv_obj_t *button);
 lv_obj_t *create_panel(lv_obj_t *button, lv_obj_t* parent);
 lv_obj_t *make_slider(lv_obj_t *button, lv_obj_t *container, int32_t min, int32_t max, int val);
 lv_obj_t *create_title(lv_obj_t *parent, const char *text);

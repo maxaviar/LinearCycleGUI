@@ -51,3 +51,4 @@ struct Settings {
 };
 
 extern Settings settings;
+extern bool limit_en;
