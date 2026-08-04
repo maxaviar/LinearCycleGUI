@@ -74,8 +74,12 @@ void setup() {
   lv_obj_t *btn_count = objcreate_button(settings, style_norm_btn, style_norm_btn_p, BTN_W, BTN_H);
   
   //Progress menu
-  lv_obj_t *slider_panel = create_panel(btn_speed, screen); // make sure to add number and units above, probably turn this into a flexbox
-  lv_obj_t *slider = make_slider(btn_speed, slider_panel);
+  lv_obj_t *speed_slider_panel = create_panel(btn_speed, screen);
+  lv_obj_t *speed_slider = make_slider(btn_speed, speed_slider_panel, MIN_SPEED, MAX_SPEED, SPEED);
+  lv_obj_t *dwell_slider_panel = create_panel(btn_dwell, screen);
+  lv_obj_t *dwell_slider = make_slider(btn_dwell, dwell_slider_panel, MIN_DWELL, MAX_DWELL, DWELL);
+  lv_obj_t *angle_slider_panel = create_panel(btn_angle, screen);
+  lv_obj_t *angle_slider = make_slider(btn_angle, angle_slider_panel, MIN_ANGLE, MAX_ANGLE, ANGLE);
 
   //Start/Stop menu
   lv_obj_t *btn_strt = objcreate_button(startstop, style_strt_btn, style_strt_btn_p, 40, 90);
