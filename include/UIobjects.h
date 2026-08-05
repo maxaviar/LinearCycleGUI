@@ -30,7 +30,11 @@ static void speed_event_cb(lv_event_t * e);
 static void dwell_event_cb(lv_event_t * e);
 static void angle_event_cb(lv_event_t * e);
 static void startstop_event_cb(lv_event_t * e);
+static void textarea_event_cb (lv_event_t *e);
+static void textarea_focus_cb (lv_event_t *e);
+static void btnmatrix_event_cb (lv_event_t *e);
 
+lv_obj_t *create_textarea(lv_obj_t *parent);
 void startstopswitch (lv_obj_t *start, lv_obj_t *stop);
 lv_obj_t *create_limit(lv_obj_t *button);
 lv_obj_t *create_panel(lv_obj_t *button, lv_obj_t* parent);

@@ -87,18 +87,71 @@ static void angle_event_cb(lv_event_t *e) {
 }
 
 static void startstop_event_cb(lv_event_t *e) {
-  lv_event_code_t code = lv_event_get_code(e);
-  lv_obj_t *button = (lv_obj_t *)lv_event_get_user_data(e);
-  bool hidden = lv_obj_has_flag(button, LV_OBJ_FLAG_HIDDEN);
+  //lv_event_code_t code = lv_event_get_code(e);
+  lv_obj_t *toshow = (lv_obj_t *)lv_event_get_user_data(e);
+  lv_obj_t *tohide = (lv_obj_t *)lv_event_get_target(e);
 
-  if (hidden) lv_obj_clear_flag(button, LV_OBJ_FLAG_HIDDEN); // Show button
-  else lv_obj_add_flag(button, LV_OBJ_FLAG_HIDDEN); // Hide button
+  lv_obj_clear_flag(toshow, LV_OBJ_FLAG_HIDDEN); // Show button
+  lv_obj_add_flag(tohide, LV_OBJ_FLAG_HIDDEN); // Hide button
 }
 
 void startstopswitch (lv_obj_t *start, lv_obj_t *stop) {
   lv_obj_add_flag(stop, LV_OBJ_FLAG_HIDDEN);
-  lv_obj_add_event_cb(start, btn_event_cb, LV_EVENT_CLICKED, stop); //these events need to separated into two separate ones
-  lv_obj_add_event_cb(stop, btn_event_cb, LV_EVENT_CLICKED, start);
+  lv_obj_add_event_cb(start, startstop_event_cb, LV_EVENT_CLICKED, stop);
+  lv_obj_add_event_cb(stop, startstop_event_cb, LV_EVENT_CLICKED, start);
+}
+
+static void textarea_event_cb (lv_event_t *e) {
+  lv_obj_t *ta = lv_event_get_target(e);
+  lv_obj_t *btnmatrix = (lv_obj_t *)lv_event_get_user_data(e);
+
+  char *endptr;
+  settings.limit = (int)strtol(lv_textarea_get_text(ta), &endptr, 10);
+
+  lv_obj_add_flag(btnmatrix, LV_OBJ_FLAG_HIDDEN);
+}
+
+static void textarea_focus_cb (lv_event_t *e) {
+  lv_obj_t *btnmatrix = (lv_obj_t *)lv_event_get_user_data(e);
+  lv_event_code_t code = lv_event_get_code(e);
+
+  if (code == LV_EVENT_FOCUSED) lv_obj_clear_flag(btnmatrix, LV_OBJ_FLAG_HIDDEN);
+}
+
+static void btnmatrix_event_cb (lv_event_t *e) {
+  lv_obj_t *btnmatrix = lv_event_get_target(e);
+  lv_obj_t *ta = (lv_obj_t *)lv_event_get_user_data(e);
+  const char *txt = lv_btnmatrix_get_btn_text(btnmatrix, lv_btnmatrix_get_selected_btn(btnmatrix));
+
+  if(strcmp(txt, LV_SYMBOL_BACKSPACE) == 0) lv_textarea_del_char(ta);
+  else if(strcmp(txt, LV_SYMBOL_NEW_LINE) == 0) lv_event_send(ta, LV_EVENT_READY, NULL);
+  else lv_textarea_add_text(ta, txt);
+}
+
+lv_obj_t *create_textarea(lv_obj_t *parent) {
+  lv_obj_t *ta = lv_textarea_create(parent);
+  lv_textarea_set_one_line(ta, true);
+  lv_obj_set_align(ta, LV_ALIGN_BOTTOM_MID);
+  lv_obj_add_state(ta, LV_STATE_FOCUSED); // To be sure cursor is visible, whatever that means
+
+  static const char *btnmatrix_map[] = {
+    "1", "2", "3", "\n",
+    "4", "5", "6", "\n",
+    "7", "8", "9", "\n",
+    LV_SYMBOL_BACKSPACE, "0", LV_SYMBOL_NEW_LINE, ""
+  };
+
+  lv_obj_t *btnmatrix = lv_btnmatrix_create(lv_scr_act());
+  lv_obj_add_flag(btnmatrix, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_set_size(btnmatrix, lv_pct(40), lv_pct(30));
+  lv_obj_align_to(btnmatrix, parent, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+  lv_obj_add_event_cb(btnmatrix, btnmatrix_event_cb, LV_EVENT_VALUE_CHANGED, ta);
+  lv_obj_add_event_cb(ta, textarea_focus_cb, LV_EVENT_FOCUSED, btnmatrix);
+  lv_obj_add_event_cb(ta, textarea_event_cb, LV_EVENT_READY, btnmatrix);
+  lv_obj_clear_flag(btnmatrix, LV_OBJ_FLAG_CLICK_FOCUSABLE);
+  lv_btnmatrix_set_map(btnmatrix, btnmatrix_map);
+
+  return ta;
 }
 
 lv_obj_t *create_limit(lv_obj_t *button) {
