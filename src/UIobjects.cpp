@@ -1,11 +1,10 @@
 #include "UIobjects.h"
 
 Settings settings;
-bool limit_en;
 
-lv_obj_t *speed_label;
+lv_obj_t *time_label;
 lv_obj_t *dwell_label;
-lv_obj_t *angle_label;
+lv_obj_t *distance_label;
 
 lv_obj_t *objcreate_button(lv_obj_t *parent, lv_style_t &style_button, lv_style_t &style_button_pressed, lv_coord_t w, lv_coord_t h) {
   lv_obj_t *btn = lv_btn_create(parent);
@@ -36,10 +35,10 @@ lv_obj_t *flexbox (lv_obj_t* parent, lv_align_t alignment, lv_flex_flow_t flow, 
 static void limit_event_cb(lv_event_t *e) {
   lv_obj_t *label = (lv_obj_t *) lv_event_get_user_data(e);
 
-  if (!limit_en) lv_label_set_text(label, "Limit: ON");
+  if (!settings.limit_en) lv_label_set_text(label, "Limit: ON");
   else lv_label_set_text(label, "Limit: OFF");
   
-  limit_en = !limit_en;
+  settings.limit_en = !settings.limit_en;
 }
 
 static void btn_event_cb(lv_event_t *e) {
@@ -53,14 +52,13 @@ static void btn_event_cb(lv_event_t *e) {
   }
 }
 
-static void speed_event_cb(lv_event_t *e) {
+static void time_event_cb(lv_event_t *e) {
   if (lv_event_get_user_data(e) != NULL) { //shouldn't ever be null, but dereferencing a null pointer is never fun so #justincase
     int32_t *var = (int32_t*)lv_event_get_user_data(e);
     lv_obj_t *slider = lv_event_get_target(e);
-    int32_t slide_val = lv_slider_get_value(slider);
-    *var = slide_val*10;
+    *var = lv_slider_get_value(slider);
 
-    lv_label_set_text_fmt(speed_label, "%d step/sec", *var);
+    lv_label_set_text_fmt(time_label, "%d sec", *var);
   }
 }
 
@@ -75,14 +73,13 @@ static void dwell_event_cb(lv_event_t *e) {
   }
 }
 
-static void angle_event_cb(lv_event_t *e) {
+static void distance_event_cb(lv_event_t *e) {
   if (lv_event_get_user_data(e) != NULL) { //shouldn't ever be null, but dereferencing a null pointer is never fun so #justincase
     int32_t *var = (int32_t*)lv_event_get_user_data(e);
     lv_obj_t *slider = lv_event_get_target(e);
-    int32_t slide_val = lv_slider_get_value(slider);
-    *var = slide_val*10;
+    *var = lv_slider_get_value(slider);
 
-    lv_label_set_text_fmt(angle_label, "%d degrees", *var);
+    lv_label_set_text_fmt(distance_label, "%d mm", *var);
   }
 }
 
@@ -90,6 +87,7 @@ static void startstop_event_cb(lv_event_t *e) {
   //lv_event_code_t code = lv_event_get_code(e);
   lv_obj_t *toshow = (lv_obj_t *)lv_event_get_user_data(e);
   lv_obj_t *tohide = (lv_obj_t *)lv_event_get_target(e);
+  settings.start = !settings.start;
 
   lv_obj_clear_flag(toshow, LV_OBJ_FLAG_HIDDEN); // Show button
   lv_obj_add_flag(tohide, LV_OBJ_FLAG_HIDDEN); // Hide button
@@ -158,8 +156,7 @@ lv_obj_t *create_limit(lv_obj_t *button) {
   lv_obj_t *label = lv_label_create(button);
   lv_obj_set_align(label, LV_ALIGN_CENTER);
   lv_label_set_text(label, "Limit: OFF");
-  limit_en = false;
-
+  
   lv_obj_add_event_cb(button, limit_event_cb, LV_EVENT_CLICKED, label);
 
   return label;
@@ -194,14 +191,12 @@ lv_obj_t *make_slider(lv_obj_t *button, lv_obj_t *container, int32_t min, int32_
   lv_obj_set_width(slider, lv_pct(90));
 
   switch (val) {
-    case SPEED:
-      min = min/10;
-      max = max/10;
+    case TIME:
       lv_slider_set_range(slider, min, max);
-      speed_label = lv_label_create(container);
-      lv_label_set_text_fmt(speed_label, "%d step/sec", settings.speed);
+      time_label = lv_label_create(container);
+      lv_label_set_text_fmt(time_label, "%d sec", settings.time);
       
-      lv_obj_add_event_cb(slider, speed_event_cb, LV_EVENT_VALUE_CHANGED, &settings.speed);
+      lv_obj_add_event_cb(slider, time_event_cb, LV_EVENT_VALUE_CHANGED, &settings.time);
       break;
 
     case DWELL:
@@ -213,19 +208,17 @@ lv_obj_t *make_slider(lv_obj_t *button, lv_obj_t *container, int32_t min, int32_
       lv_obj_add_event_cb(slider, dwell_event_cb, LV_EVENT_VALUE_CHANGED, &settings.dwell);
       break;
 
-    case ANGLE:
-      min = min/10;
-      max = max/10;
+    case DISTANCE:
       lv_slider_set_range(slider, min, max);
-      angle_label = lv_label_create(container);
-      lv_label_set_text_fmt(angle_label, "%d degrees", settings.angle);
+      distance_label = lv_label_create(container);
+      lv_label_set_text_fmt(distance_label, "%d mm", settings.distance);
 
-      lv_obj_add_event_cb(slider, angle_event_cb, LV_EVENT_VALUE_CHANGED, &settings.angle);
+      lv_obj_add_event_cb(slider, distance_event_cb, LV_EVENT_VALUE_CHANGED, &settings.distance);
       break;
     /*  
     case LIMIT:
       lv_slider_set_range(slider, min, max);
-      lv_obj_add_event_cb(slider, slider_event_cb, LV_EVENT_VALUE_CHANGED, &settings.speed);
+      lv_obj_add_event_cb(slider, slider_event_cb, LV_EVENT_VALUE_CHANGED, &settings.time);
       break;
     */
   }

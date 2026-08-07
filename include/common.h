@@ -23,27 +23,26 @@
 #define TITLE_H 80
 
 /* Settings for operation */
-#define MIN_SPEED 100
-#define MAX_SPEED 200
+#define MIN_TIME 1
+#define MAX_TIME 10
 #define MIN_DWELL 0
 #define MAX_DWELL 5000
-#define MIN_ANGLE 90
-#define MAX_ANGLE 270
+#define MIN_DISTANCE 5
+#define MAX_DISTANCE 15
 
-#define SPEED 0
+#define TIME 0
 #define DWELL 1
-#define ANGLE 2 
+#define DISTANCE 2 
 #define LIMIT 3
 
 struct Settings {
-    int32_t speed = 100; // in steps/sec. | Ranges from 100 to 200
-    int32_t dwell = 0; // in millisec | Ranges from 0 to 5000
-    int32_t angle = 90; // in degrees | 90 to 270
+    int time = 1; // in seconds | Ranges from 1 to 10
+    unsigned long dwell = 0; // in milliseconds | Ranges from 0 to 5000
+    int distance = 5; // in millimeters | Ranges from 5 to 15
     int32_t limit = 0;
     bool start = false;
-    bool apply_limit = false;
+    bool limit_en = false;
     long count = 0;
 };
 
 extern Settings settings;
-extern bool limit_en;

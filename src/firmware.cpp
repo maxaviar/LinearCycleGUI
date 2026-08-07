@@ -3,6 +3,8 @@
 LGFX tft;
 PCA9557 Out;
 
+#define DEBUG 0
+
 void display_init() {
   //Display Prepare
   tft.begin();
@@ -59,11 +61,13 @@ void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
       /*Set the coordinates*/
       data->point.x = touchX;
       data->point.y = touchY;
+   
+      #if DEBUG == 1
+         Serial.print( "Data x " );
+         Serial.println( touchX );
 
-      Serial.print( "Data x " );
-      Serial.println( touchX );
-
-      Serial.print( "Data y " );
-      Serial.println( touchY );
+         Serial.print( "Data y " );
+         Serial.println( touchY );
+      #endif
    }
 }

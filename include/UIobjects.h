@@ -1,9 +1,9 @@
 #pragma once
 #include "common.h"
 
-extern lv_obj_t *speed_label;
+extern lv_obj_t *time_label;
 extern lv_obj_t *dwell_label;
-extern lv_obj_t *angle_label;
+extern lv_obj_t *distance_label;
 
 /* Creating objects */
 lv_obj_t *objcreate_button (
@@ -26,13 +26,14 @@ lv_obj_t *flexbox (
 
 static void limit_event_cb(lv_event_t * e);
 static void btn_event_cb(lv_event_t * e);
-static void speed_event_cb(lv_event_t * e);
+static void time_event_cb(lv_event_t * e);
 static void dwell_event_cb(lv_event_t * e);
-static void angle_event_cb(lv_event_t * e);
+static void distance_event_cb(lv_event_t * e);
 static void startstop_event_cb(lv_event_t * e);
 static void textarea_event_cb (lv_event_t *e);
 static void textarea_focus_cb (lv_event_t *e);
 static void btnmatrix_event_cb (lv_event_t *e);
+static void update_count(lv_timer_t *timer);
 
 lv_obj_t *create_textarea(lv_obj_t *parent);
 void startstopswitch (lv_obj_t *start, lv_obj_t *stop);
